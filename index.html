@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>sistema_identificacion.exe</title>
+<style>
+body {
+    margin: 0;
+    font-family: "Courier New", monospace;
+    background: #000;
+    color: #fff;
+}
+
+.pantalla {
+    display: none;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.activa { display: flex; }
+
+/* LOGIN */
+.lock { font-size: 60px; margin-bottom: 20px; }
+.titulo-lock { letter-spacing: 4px; font-size: 12px; margin-bottom: 30px; color: #aaa; }
+.input-line {
+    border: none; border-bottom: 1px solid #555; background: transparent;
+    color: #fff; font-size: 20px; text-align: center; padding: 10px; width: 250px; outline: none;
+}
+.btn-lock {
+    margin-top: 40px; padding: 12px 30px; border: 1px solid #555;
+    border-radius: 30px; background: transparent; color: #fff; cursor: pointer; transition: 0.3s;
+}
+.btn-lock:hover { background: #fff; color: #000; }
+
+/* TERMINAL */
+.ventana {
+    width: 90%; max-width: 720px; background: #0a0a0a;
+    border-radius: 12px; box-shadow: 0 0 25px rgba(0,255,100,0.25); overflow: hidden;
+}
+.barra { background: #1a1a1a; padding: 8px; display: flex; align-items: center; gap: 8px; }
+.boton { width: 12px; height: 12px; border-radius: 50%; }
+.rojoBtn { background: #ff5f56; }
+.amarilloBtn { background: #ffbd2e; }
+.verdeBtn { background: #27c93f; }
+.titulo { color: #ccc; margin-left: 10px; font-size: 12px; }
+.terminal { padding: 20px; color: #00ff66; }
+.linea { margin: 4px 0; }
+.rojo { color: #ff4d4d; }
+
+.cursor::after {
+    content: "_";
+    animation: blink 1s infinite;
+}
+@keyframes blink {
+    0%,50%,100%{opacity:1;}25%,75%{opacity:0;}
+}
+
+/* FINAL */
+.final {
+    background: radial-gradient(circle, #1a0000, #000);
+    color: #fff;
+    text-align: center;
+}
+.final h2 {
+    letter-spacing: 6px;
+    font-size: 12px;
+    color: #aaa;
+}
+.final h1 {
+    font-family: serif;
+    font-size: 50px;
+    margin: 20px 0;
+}
+.final p {
+    color: #ff4d6d;
+    letter-spacing: 3px;
+}
+
+#pantalla4 img {
+    width: 80vw;      /* ancho adaptable */
+    max-width: 500px; 
+    height: auto;     /* 👈 clave: mantiene proporción real */
+    border-radius: 15px;
+    box-shadow: 0 0 25px rgba(255, 0, 100, 0.25);
+}
+
+.carta-img {
+    width: 80vw;      /* ancho adaptable */
+    max-width: 500px; 
+    height: auto;     /* 👈 clave: mantiene proporción real */
+    border-radius: 15px;
+    box-shadow: 0 0 25px rgba(255, 0, 100, 0.25);
+}
+
+.lluvia-corazones {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.corazon {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    background: #ff4d6d;
+    transform: rotate(45deg);
+    animation: caer 4s linear forwards;
+}
+
+.corazon::before,
+.corazon::after {
+    content: "";
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    background: #ff4d6d;
+    border-radius: 50%;
+}
+
+.corazon::before { top: -7px; }
+.corazon::after { left: -7px; }
+
+@keyframes caer {
+    0% {
+        transform: translate(0, -10vh);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--drift), 110vh);
+        opacity: 0;
+    }
+}
+
+/* TRANSICIONES CINEMATOGRÁFICAS */
+.pantalla {
+    opacity: 0;
+    transform: scale(1.05);
+    filter: blur(10px);
+    transition: all 0.8s ease;
+    pointer-events: none;
+}
+
+.pantalla.activa {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+    pointer-events: all;
+}
+
+/* salida suave */
+.pantalla.salida {
+    opacity: 0;
+    transform: scale(0.95);
+    filter: blur(8px);
+}
+
+</style>
+</head>
+<body>
+
+<audio id="musica" loop>
+  <source src="Emmanuel Cortes- Amor (Official Video) (mp3cut.net).mp3" type="audio/mpeg">
+</audio>
+
+<!-- LOGIN -->
+<div id="pantalla1" class="pantalla activa">
+    <div class="lock">🔒</div>
+    <div class="titulo-lock">ACCESO RESTRINGIDO</div>
+    <input class="input-line" type="text" id="nombre" placeholder="ingresa la clave...">
+    <button class="btn-lock" onclick="validar()">desbloquear</button>
+</div>
+
+<!-- TERMINAL -->
+<div id="pantalla2" class="pantalla">
+    <div class="ventana">
+        <div class="barra">
+            <div class="boton rojoBtn"></div>
+            <div class="boton amarilloBtn"></div>
+            <div class="boton verdeBtn"></div>
+            <div class="titulo">sistema_identificacion.exe</div>
+        </div>
+        <div class="terminal" id="terminal"></div>
+    </div>
+</div>
+
+<div id="pantalla5" class="pantalla">
+    <div class="ventana">
+        <div class="barra">
+            <div class="boton rojoBtn"></div>
+            <div class="boton amarilloBtn"></div>
+            <div class="boton verdeBtn"></div>
+            <div class="titulo">analisis_emocional.exe</div>
+        </div>
+        <div class="terminal" id="terminal2"></div>
+    </div>
+</div>
+
+<!-- FINAL -->
+<div id="pantalla3" class="pantalla final">
+    <h2>ACCESO CONCEDIDO</h2>
+    <h1>Ariana</h1>
+    <p>solo funciona contigo</p>
+
+    <button class="btn-lock" onclick="abrirCarta()">Abrir Recuerdo</button>
+</div>
+
+
+<div id="pantalla4" class="pantalla carta">
+    <img src="ariana.PNG" class="carta-img">
+</div>
+
+<script>
+const NOMBRE_SECRETO = "Ariana";
+
+function cambiar(p1,p2){
+    const actual = document.getElementById(p1);
+    const siguiente = document.getElementById(p2);
+
+    actual.classList.add("salida");
+
+    setTimeout(() => {
+        actual.classList.remove("activa","salida");
+        siguiente.classList.add("activa");
+    }, 600);
+}
+
+function escribir(texto, clase=""){
+    return new Promise(resolve=>{
+        const terminal=document.getElementById("terminal");
+        const div=document.createElement("div");
+        div.className="linea cursor "+clase;
+        terminal.appendChild(div);
+        let i=0;
+        const inter=setInterval(()=>{
+            div.textContent=texto.substring(0,i);
+            i++;
+            if(i>texto.length){
+                clearInterval(inter);
+                div.classList.remove("cursor");
+                resolve();
+            }
+        },40);
+    });
+}
+
+async function validar(){
+    const nombre=document.getElementById("nombre").value.trim();
+    if(!nombre) return;
+
+    // 🎵 AQUÍ VA
+    const audio = document.getElementById("musica");
+
+    // iniciar muy bajito
+    audio.volume = 0.05;
+    audio.play();
+
+    // subir poco a poco
+    let vol = 0.05;
+    const fade = setInterval(()=>{
+        if(vol < 0.4){ // volumen final suave
+            vol += 0.01; // velocidad lenta (más romántico)
+            audio.volume = vol;
+        } else {
+            clearInterval(fade);
+        }
+    },200);
+
+    cambiar("pantalla1","pantalla2");
+
+    cambiar("pantalla1","pantalla2");
+    const terminal=document.getElementById("terminal");
+    terminal.innerHTML="";
+
+    await escribir("Esta app no está disponible para todos...");
+    await escribir("Buscando a la persona correcta...");
+    await escribir("Iniciando protocolo de identificación...");
+
+    await new Promise(r=>setTimeout(r,800));
+    terminal.innerHTML="";
+
+    await escribir("▶ Iniciando protocolo de identificación...");
+    await escribir("▶ Analizando datos...");
+    await escribir("▶ Comparando con base de datos global...");
+    await escribir("▶ Buscando coincidencias...");
+
+    await new Promise(r=>setTimeout(r,800));
+
+    // 🔥 DECISIÓN AQUÍ
+    if(nombre.toLowerCase()===NOMBRE_SECRETO.toLowerCase()){
+
+    await escribir("✔ Coincidencia encontrada");
+    await escribir("✔ Acceso autorizado","rojo");
+
+    await new Promise(r=>setTimeout(r,1000));
+    cambiar("pantalla2","pantalla5");
+
+    const terminal2 = document.getElementById("terminal2");
+    terminal2.innerHTML = "";
+
+    await escribir2("▶ Conectando con base de datos emocional...");
+    await escribir2("▶ Sincronizando recuerdos...");
+    await escribir2("▶ Procesando momentos contigo...");
+    await escribir2("⚡ Analizando impacto emocional...");
+
+    // 👇 AQUÍ VA LA PAUSA
+    await new Promise(r=>setTimeout(r,800));
+
+    await escribir2("ERROR: imposible olvidarte","rojo");
+    await escribir2("▶ Buscando solución...");
+    await escribir2("SOLUCIÓN: quedarte conmigo ❤️","rojo");
+    await new Promise(r=>setTimeout(r,1500));
+    cambiar("pantalla5","pantalla3");
+
+    } else {
+
+    await escribir("✖ Coincidencia no encontrada","rojo");
+    await escribir("✖ ACCESO DENEGADO","rojo");
+
+    setTimeout(()=>{
+        cambiar("pantalla2","pantalla1");
+    },2000);
+
+    const audio = document.getElementById("musica");
+    audio.volume = 0;
+    audio.play();
+
+    let vol = 0;
+    const fade = setInterval(()=>{
+        if(vol < 0.2){
+            vol += 0.05;
+            audio.volume = vol;
+        } else {
+            clearInterval(fade);
+        }
+    },200);
+
+    }
+}
+
+function escribir2(texto, clase=""){
+    return new Promise(resolve=>{
+        const terminal=document.getElementById("terminal2");
+        const div=document.createElement("div");
+        div.className="linea cursor "+clase;
+        terminal.appendChild(div);
+        let i=0;
+        const inter=setInterval(()=>{
+            div.textContent=texto.substring(0,i);
+            i++;
+            if(i>texto.length){
+                clearInterval(inter);
+                div.classList.remove("cursor");
+                resolve();
+            }
+        },40);
+    });
+}
+
+// abrir primera imagen
+function abrirCarta(){
+    cambiar("pantalla3","pantalla4");
+    iniciarLluvia(); "💖"
+}
+
+
+let lluviaActiva = false;
+let intervaloLluvia;
+
+function iniciarLluvia(){
+    if(lluviaActiva) return;
+    lluviaActiva = true;
+
+    const contenedor = document.getElementById("lluvia");
+
+    intervaloLluvia = setInterval(() => {
+        const corazon = document.createElement("div");
+        corazon.className = "corazon";
+
+        const emojis = ["💖","💘","💕","💝"];
+        corazon.innerHTML = emojis[Math.floor(Math.random()*emojis.length)];
+
+        corazon.style.left = Math.random() * 100 + "vw";
+
+        // tamaño aleatorio
+        corazon.style.fontSize = (16 + Math.random() * 20) + "px";
+
+        // duración diferente = viento diferente
+        corazon.style.animationDuration = (4 + Math.random() * 3) + "s";
+
+        // 🔥 DESPLAZAMIENTO lateral único
+        const drift = (Math.random() * 60 - 30) + "px";
+        corazon.style.setProperty('--drift', drift);
+
+        contenedor.appendChild(corazon);
+
+        setTimeout(() => {
+            corazon.remove();
+        }, 7000);
+
+    }, 200);
+}
+
+function detenerLluvia(){
+    lluviaActiva = false;
+    clearInterval(intervaloLluvia);
+}
+
+</script>
+
+    <div id="lluvia" class="lluvia-corazones"></div>
+
+</body>
+</html>
